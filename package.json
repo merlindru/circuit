@@ -1,14 +1,7 @@
 {
-	"name": "@circ/circuit",
-	"version": "0.1.0-alpha.0",
-	"description": "Circuitry for frameworks",
-	"main": "index.js",
-	"private": false,
-	"types": "index.d.ts",
 	"scripts": {
-		"prepublish": "npm run build",
-		"prepack": "npm run build",
-		"build": "tsc"
+		"build": "lerna run build",
+		"publish": "lerna publish"
 	},
 	"repository": {
 		"type": "git",
@@ -21,6 +14,9 @@
 	},
 	"homepage": "https://github.com/merlindru/circuit#readme",
 	"devDependencies": {
-		"typescript": "^5.0.4"
-	}
+		"lerna": "^6.6.1"
+	},
+	"workspaces": [
+		"packages/*"
+	]
 }
