@@ -9,9 +9,12 @@
 		"build": "tsc"
 	},
 	"devDependencies": {
-		"typescript": "^5.0.4"
+		"typescript": "^5.0.4",
+		"@circ/circuit": "^0.1.0-alpha.0",
+		"zod": "^3.0.0"
 	},
 	"peerDependencies": {
-		"@circ/core": "^0.1.0"
+		"@circ/circuit": "^0.1.0-alpha.0",
+		"zod": "^3.0.0"
 	}
 }

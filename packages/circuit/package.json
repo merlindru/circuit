@@ -2,9 +2,9 @@
 	"name": "@circ/circuit",
 	"version": "0.1.0-alpha.0",
 	"description": "Circuitry for frameworks",
-	"main": "index.js",
+	"main": "dist/index.js",
 	"private": false,
-	"types": "index.d.ts",
+	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "tsc"
 	},
