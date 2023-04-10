@@ -110,10 +110,10 @@ export function setupRemixCircuit<
 
 				return await callback(req, ctx); // `return await` needed for try/catch! do not remove
 			} catch (err: any) {
-				if (config?.error !== undefined) {
-					// eslint-disable-next-line no-ex-assign
-					err = (await config.error(err)) ?? err;
-				}
+				// if (config?.error !== undefined) {
+				// 	// eslint-disable-next-line no-ex-assign
+				// 	err = (await config.error(err)) ?? err;
+				// }
 
 				throw err;
 			}
@@ -129,7 +129,7 @@ export function setupRemixCircuit<
 	 * Parses form data and returns it as an object.
 	 */
 	function formData<C>() {
-		return compose<DataFnArgs, C, any, C>(async ({ request }, ctx) => {
+		return compose<DataFnArgs, C, unknown, C>(async ({ request }, ctx) => {
 			return Object.fromEntries(await request.formData());
 		});
 	}
@@ -208,26 +208,31 @@ export function setupRemixCircuit<
 	const isLoggedIn = config?.isLoggedIn ?? (() => false);
 	const isAuthorized = config?.isAuthorized ?? (() => false);
 
+	/**
+	 * Same as {@link withSession}, but checks if the user is logged in and authorized.
+	 */
 	function auth(authConfig?: AuthConfig) {
-		return compose.pipe(withSession(), async (input, ctx) => {
-			// Check if logged in
-			if (!isLoggedIn(ctx.session)) {
-				if (authConfig?.onLoggedOut) {
-					return authConfig.onLoggedOut(ctx);
+		return compose(
+			compose.pipe(withSession(), async (input, ctx) => {
+				// Check if logged in
+				if (!isLoggedIn(ctx.session)) {
+					if (authConfig?.onLoggedOut) {
+						return authConfig.onLoggedOut(ctx);
+					}
+					throw new Error("Unauthorized");
 				}
-				throw new Error("Unauthorized");
-			}
 
-			// Check if authorized
-			if (authConfig && !isAuthorized(ctx.session, authConfig)) {
-				if (authConfig?.onForbidden) {
-					return authConfig.onForbidden(ctx);
+				// Check if authorized
+				if (authConfig && !isAuthorized(ctx.session, authConfig)) {
+					if (authConfig?.onForbidden) {
+						return authConfig.onForbidden(ctx);
+					}
+					throw new Error("Forbidden");
 				}
-				throw new Error("Forbidden");
-			}
 
-			return input;
-		});
+				return input;
+			})
+		) as ReturnType<typeof withSession>;
 	}
 
 	return { compose };
