@@ -1,12 +1,14 @@
 {
 	"name": "@circ/remix",
-	"version": "0.1.0-alpha.1",
+	"version": "0.1.0-alpha.2",
 	"description": "Circuitry for Remix",
 	"main": "index.js",
 	"private": false,
 	"types": "index.d.ts",
 	"scripts": {
-		"build": "tsc"
+		"build": "tsc",
+		"prepublish": "npm run build",
+		"preversion": "tsc --noEmit"
 	},
 	"devDependencies": {
 		"typescript": "^5.0.4",
