@@ -94,7 +94,11 @@ export function setupRemixCircuit<
 	// 1. handle middleware
 	// 2. inject the context argument (2nd arg)
 	function dataFn<
-		Callback extends Middleware<DataFnArgs, Ctx, any> | Pipe<any> = any
+		Callback extends Middleware<DataFnArgs, Ctx, any> = Middleware<
+			DataFnArgs,
+			Ctx,
+			any
+		>
 	>(callback: Callback) {
 		return (async (req: DataFnArgs, ctx: Ctx) => {
 			try {
@@ -121,7 +125,7 @@ export function setupRemixCircuit<
 			}
 		}) as Callback extends Middleware<DataFnArgs, Ctx, infer Result>
 			? Result
-			: Callback extends Pipe<infer Result>
+			: Callback extends Pipe<any, any, infer Result>
 			? Result
 			: never;
 	}

@@ -1,0 +1,9 @@
+**/*.ts
+!**/*.d.ts
+**/*.tgz
+**/tsconfig.json
+**/node_modules
+
+.git/
+.gitignore
+.npmignore
