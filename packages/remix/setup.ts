@@ -2,7 +2,6 @@ import { ZodError, ZodSchema, z } from "zod";
 import {
 	Config as BaseConfig,
 	Middleware,
-	Pipe,
 	pipe,
 	setupCircuit,
 } from "@circ/circuit";
