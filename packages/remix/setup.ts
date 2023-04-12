@@ -123,11 +123,7 @@ export function setupRemixCircuit<
 
 				throw err;
 			}
-		}) as Callback extends Middleware<DataFnArgs, Ctx, infer Result>
-			? Result
-			: Callback extends Pipe<any, any, infer Result>
-			? Result
-			: never;
+		}) as Middleware<DataFnArgs, Ctx, ReturnType<Callback>>;
 	}
 
 	// ----- Utils -----
