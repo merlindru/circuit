@@ -1,4 +1,4 @@
-import type { BaseCtx } from "./circuit";
+import type { BaseCtx } from "./setup";
 
 type FakeResult<Value = unknown, Ctx = unknown> = { value: Value; ctx: Ctx };
 
