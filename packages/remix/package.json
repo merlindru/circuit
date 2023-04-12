@@ -2,9 +2,9 @@
 	"name": "@circ/remix",
 	"version": "0.1.0-alpha.7",
 	"description": "Circuitry for Remix",
-	"main": "index.js",
+	"main": "dist/index.js",
 	"private": false,
-	"types": "index.d.ts",
+	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "tsc",
 		"prepublish": "npm run build",
