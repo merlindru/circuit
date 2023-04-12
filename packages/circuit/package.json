@@ -2,11 +2,16 @@
 	"name": "@circ/circuit",
 	"version": "0.1.0-alpha.13",
 	"description": "Circuitry for frameworks",
-	"main": "dist/index.mjs",
+	"exports": {
+		"import": "./dist/esm/index.mjs",
+		"require": "./dist/cjs/index.js",
+		"types": "./dist/types/index.d.ts"
+	},
 	"private": false,
 	"types": "dist/index.d.ts",
 	"scripts": {
-		"build": "rimraf ./dist && tsc && renamer --find .js --replace .mjs ./dist/**/*.js",
+		"build": "npm run clean && tsc -b tsconfig.cjs.json tsconfig.esm.json tsconfig.types.json",
+		"clean": "rimraf ./dist",
 		"prepublish": "npm run build",
 		"preversion": "tsc --noEmit"
 	},
