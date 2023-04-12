@@ -2,7 +2,7 @@
 	"name": "@circ/remix",
 	"version": "0.1.0-alpha.12",
 	"description": "Circuitry for Remix",
-	"main": "dist/index.js",
+	"main": "dist/index.mjs",
 	"private": false,
 	"types": "dist/index.d.ts",
 	"scripts": {

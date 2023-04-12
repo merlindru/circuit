@@ -2,7 +2,7 @@
 	"name": "@circ/circuit",
 	"version": "0.1.0-alpha.12",
 	"description": "Circuitry for frameworks",
-	"main": "dist/index.js",
+	"main": "dist/index.mjs",
 	"private": false,
 	"types": "dist/index.d.ts",
 	"scripts": {
