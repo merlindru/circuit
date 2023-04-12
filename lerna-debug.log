@@ -1,0 +1,6 @@
+49 error Error: Command failed with exit code 128: git tag v0.1.0-alpha.15 -m v0.1.0-alpha.15
+49 error fatal: tag 'v0.1.0-alpha.15' already exists
+49 error     at makeError (/Users/merlindruzinec/src/teachother/circuit/node_modules/execa/lib/error.js:59:11)
+49 error     at handlePromise (/Users/merlindruzinec/src/teachother/circuit/node_modules/execa/index.js:114:26)
+49 error     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+49 error     at async Promise.all (index 0)
