@@ -13,18 +13,28 @@ import {
 
 type ResolveConfig<C> = C | ((args: { pipe: typeof pipe }) => C);
 
+type DefaultAuthConfig<SessionData> = {
+	onLoggedOut?: (ctx: {
+		session: RemixSession<SessionData>;
+	}) => Response | Promise<Response>;
+	onForbidden?: (ctx: {
+		session: RemixSession<SessionData>;
+	}) => Response | Promise<Response>;
+};
+
 export type Config<
 	Mw extends Middleware<any, any>,
-	SessionData
+	SessionData,
+	AuthRequirements = any
 > = BaseConfig<Mw> & {
 	session?: {
 		storage: RemixStorage<SessionData>;
 		cookieName: string;
 	};
 	isLoggedIn?: (session: RemixSession<SessionData>) => boolean;
-	isAuthorized?: <R>(
+	isAuthorized?: (
 		session: RemixSession<SessionData>,
-		requirements: R
+		requirements: AuthRequirements
 	) => boolean;
 };
 
@@ -189,10 +199,8 @@ export function setupRemixCircuit<
 		);
 	}
 
-	type AuthConfig = {
-		onLoggedOut?: (ctx: WithSession) => Response | Promise<Response>;
-		onForbidden?: (ctx: WithSession) => Response | Promise<Response>;
-	};
+	type AuthConfig = DefaultAuthConfig<SessionData> &
+		Parameters<typeof isAuthorized>[1];
 
 	const isLoggedIn = config?.isLoggedIn ?? (() => false);
 	const isAuthorized = config?.isAuthorized ?? (() => false);
