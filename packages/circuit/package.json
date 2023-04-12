@@ -5,6 +5,7 @@
 	"main": "dist/index.js",
 	"private": false,
 	"types": "dist/index.d.ts",
+	"type": "module",
 	"scripts": {
 		"build": "tsc",
 		"prepublish": "npm run build",
