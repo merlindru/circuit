@@ -6,7 +6,7 @@
 	"private": false,
 	"types": "dist/index.d.ts",
 	"scripts": {
-		"build": "tsc --clean && renamer --find .js --replace .mjs dist/**/*.js",
+		"build": "tsc --build --clean && renamer --find .js --replace .mjs dist/**/*.js",
 		"prepublish": "npm run build",
 		"preversion": "tsc --noEmit"
 	},
