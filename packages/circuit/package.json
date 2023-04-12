@@ -1,6 +1,6 @@
 {
 	"name": "@circ/circuit",
-	"version": "0.1.0-y.0",
+	"version": "0.1.0-alpha.10",
 	"description": "Circuitry for frameworks",
 	"main": "dist/index.js",
 	"private": false,
