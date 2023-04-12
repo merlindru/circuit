@@ -1,18 +1,19 @@
 {
 	"name": "@circ/remix",
-	"version": "0.1.0-alpha.10",
+	"version": "0.1.0-alpha.11",
 	"description": "Circuitry for Remix",
 	"main": "dist/index.js",
 	"private": false,
 	"types": "dist/index.d.ts",
 	"scripts": {
-		"build": "tsc --build --clean && renamer --find .js --replace .mjs dist/**/*.js",
+		"build": "rimraf ./dist && tsc && renamer --find .js --replace .mjs ./dist/**/*.js",
 		"prepublish": "npm run build",
 		"preversion": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@circ/circuit": "^0.1.0-y.0",
+		"@circ/circuit": "^0.1.0-alpha.0",
 		"renamer": "^4.0.0",
+		"rimraf": "^5.0.0",
 		"typescript": "^5.0.4",
 		"zod": "^3.0.0"
 	},
