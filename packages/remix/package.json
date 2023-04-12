@@ -1,6 +1,6 @@
 {
 	"name": "@circ/remix",
-	"version": "0.1.0-alpha.14",
+	"version": "0.1.0-alpha.15",
 	"description": "Circuitry for Remix",
 	"private": false,
 	"exports": {
@@ -17,7 +17,7 @@
 		"preversion": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@circ/circuit": "^0.1.0-alpha.14",
+		"@circ/circuit": "^0.1.0-alpha.15",
 		"renamer": "^4.0.0",
 		"rimraf": "^5.0.0",
 		"typescript": "^5.0.4",
