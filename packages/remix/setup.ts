@@ -13,17 +13,6 @@ import {
 
 type ResolveConfig<C> = C | ((args: { pipe: typeof pipe }) => C);
 
-type DataFromStorage<Ss extends RemixStorage> = Ss extends RemixStorage<
-	infer Data,
-	any
->
-	? Data
-	: never;
-
-type SessionFromStorage<Ss extends RemixStorage | undefined> = Ss extends object
-	? RemixSession<DataFromStorage<Ss>>
-	: never;
-
 export type Config<
 	Mw extends Middleware<any, any>,
 	SessionData
