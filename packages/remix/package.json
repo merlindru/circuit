@@ -1,6 +1,6 @@
 {
 	"name": "@circ/remix",
-	"version": "0.1.0-alpha.4",
+	"version": "0.1.0-alpha.5",
 	"description": "Circuitry for Remix",
 	"main": "index.js",
 	"private": false,
@@ -11,7 +11,7 @@
 		"preversion": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@circ/circuit": "^0.1.0-alpha.3",
+		"@circ/circuit": "^0.1.0-alpha.5",
 		"typescript": "^5.0.4",
 		"zod": "^3.0.0"
 	},
