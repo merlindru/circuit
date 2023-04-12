@@ -164,9 +164,11 @@ export function setupRemixCircuit<
 	function assertSessionStorage(
 		s: RemixStorage | undefined
 	): asserts s is RemixStorage {
-		throw new Error(
-			"No session storage configured. Please set `session.storage` in setupRemixCircuit()."
-		);
+		if (s === undefined) {
+			throw new Error(
+				"No session storage configured. Please set `session.storage` in setupRemixCircuit()."
+			);
+		}
 	}
 
 	/**
