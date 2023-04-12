@@ -4,12 +4,11 @@
 	"description": "Circuitry for Remix",
 	"private": false,
 	"exports": {
-		".": {
-			"import": "./dist/esm/index.js",
-			"require": "./dist/cjs/index.js",
-			"types": "./dist/types/index.d.ts"
-		}
+		"import": "./dist/esm/index.js",
+		"require": "./dist/cjs/index.js",
+		"types": "./dist/types/index.d.ts"
 	},
+	"types": "./dist/types/index.d.ts",
 	"scripts": {
 		"build": "npm run clean && tsc -b tsconfig.cjs.json tsconfig.esm.json tsconfig.types.json",
 		"clean": "rimraf ./dist",
