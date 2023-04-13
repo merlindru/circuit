@@ -19,5 +19,9 @@
 	},
 	"workspaces": [
 		"packages/*"
-	]
+	],
+	"dependencies": {
+		"@circ/circuit": "^0.1.0-alpha.16",
+		"@circ/remix": "^0.1.0-alpha.19"
+	}
 }
