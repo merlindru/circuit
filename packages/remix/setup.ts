@@ -43,7 +43,12 @@ export type Config<
 export function setupRemixCircuit<
 	DataFnArgs extends { request: Request },
 	SessionData,
-	C extends Config<any, SessionData> = Config<any, SessionData>
+	AuthRequirements,
+	C extends Config<any, SessionData, AuthRequirements> = Config<
+		any,
+		SessionData,
+		AuthRequirements
+	>
 >(resolveConfig?: ResolveConfig<C>) {
 	const config =
 		typeof resolveConfig === "function"
