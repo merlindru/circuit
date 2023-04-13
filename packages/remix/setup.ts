@@ -237,7 +237,7 @@ export function setupRemixCircuit<
 				assertSessionStorage(config?.session?.storage);
 
 				(ctx as any).session = await config.session.storage.getSession(
-					input.request.headers.get(config.session.cookieName) ?? ""
+					input.request.headers.get("Cookie")
 				);
 
 				return input;
