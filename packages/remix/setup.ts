@@ -19,6 +19,9 @@ type DefaultAuthConfig<SessionData> = {
 	onForbidden?: (ctx: {
 		session: RemixSession<SessionData>;
 	}) => Response | Promise<Response>;
+	onAuthorized?: (ctx: {
+		session: RemixSession<SessionData>;
+	}) => Response | Promise<Response>;
 };
 
 export type Config<
@@ -209,6 +212,30 @@ export function setupRemixCircuit<
 	// TODO fix "as Ss" casts
 	/**
 	 * Same as {@link withSession}, but checks if the user is logged in and authorized.
+	 *
+	 *
+	 * @example
+	 * compose.pipe(
+	 *     auth({ role: "admin" }), // depends on what params your isAuthorized function takes
+	 *     async (input, ctx) => {
+	 *          // use ctx.session
+	 *          const userId = ctx.session.get("userId"); // depends on your SessionData
+	 *     }
+	 * );
+	 *
+	 *
+	 * @example
+	 * const redirectLoggedIn = auth({
+	 *     onAuthorized: () => throw redirect("/"),
+	 * });
+	 *
+	 * // Then use it in your routes:
+	 * compose.pipe(
+	 *     redirectLoggedIn,
+	 *     async (input, ctx) => {
+	 *         // user is NOT logged in
+	 *     }
+	 * );
 	 */
 	function auth(authConfig?: AuthConfig) {
 		return compose(
@@ -227,6 +254,10 @@ export function setupRemixCircuit<
 						return authConfig.onForbidden(ctx);
 					}
 					throw new Error("Forbidden");
+				}
+
+				if (authConfig?.onAuthorized) {
+					authConfig.onAuthorized(ctx);
 				}
 
 				return input;
