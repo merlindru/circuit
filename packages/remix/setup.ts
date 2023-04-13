@@ -137,6 +137,34 @@ export function setupRemixCircuit<
 	// ----- Utils -----
 	/**
 	 * Parses form data and returns it as an object.
+	 *
+	 * @example
+	 * <Form method="post">
+	 *     <input type="text" name="name" />
+	 * </Form>
+	 *
+	 * compose.pipe(
+	 *     formData<{ name: string }>(), // note this is unsafe! (unvalidated)
+	 *     (input, ctx) => {
+	 *         // input is of type { name: string }
+	 *    }
+	 * );
+	 *
+	 * @example
+	 * <Form method="post">
+	 *    <input type="text" name="name" />
+	 * </Form>
+	 *
+	 * compose.pipe(
+	 *     compose.formData(), // unsafe -- let's fix that:
+	 *     compose.zod(        // validate input (joi, ajv, yup, ... also work of course)
+	 *         z.object({ name: z.string() })
+	 *     ),
+	 *     (input, ctx) => {
+	 *         // input is of type { name: string }
+	 *         // note how you didn't have to pass any generics to formData() unlike the example above
+	 *     }
+	 * }
 	 */
 	function formData<C>() {
 		return compose<DataFnArgs, C, unknown, C>(async ({ request }, ctx) => {
@@ -149,6 +177,14 @@ export function setupRemixCircuit<
 	 * Validates the input using Zod. If the input is invalid, an error will be thrown.
 	 *
 	 * @param onError if the input is invalid, this function will be called with the error. (The error will still be thrown!)
+	 *
+	 * @example
+	 * compose.pipe(
+	 *     zod(z.object({ name: z.string() })),
+	 *     (input, ctx) => {
+	 *         // input is of type { name: string }
+	 *     }
+	 * );
 	 */
 	function zod<T extends ZodSchema, C>(
 		schema: T,
@@ -215,7 +251,6 @@ export function setupRemixCircuit<
 	const isLoggedIn = config?.isLoggedIn ?? (() => false);
 	const isAuthorized = config?.isAuthorized ?? (() => false);
 
-	// TODO fix "as Ss" casts
 	/**
 	 * Same as {@link withSession}, but checks if the user is logged in and authorized.
 	 *
@@ -226,20 +261,6 @@ export function setupRemixCircuit<
 	 *     async (input, ctx) => {
 	 *          // use ctx.session
 	 *          const userId = ctx.session.get("userId"); // depends on your SessionData
-	 *     }
-	 * );
-	 *
-	 *
-	 * @example
-	 * const redirectLoggedIn = auth({
-	 *     onAuthorized: () => throw redirect("/"),
-	 * });
-	 *
-	 * // Then use it in your routes:
-	 * compose.pipe(
-	 *     redirectLoggedIn,
-	 *     async (input, ctx) => {
-	 *         // user is NOT logged in
 	 *     }
 	 * );
 	 */
