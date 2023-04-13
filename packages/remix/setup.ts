@@ -19,9 +19,10 @@ type DefaultAuthConfig<SessionData> = {
 	onForbidden?: (ctx: {
 		session: RemixSession<SessionData>;
 	}) => Response | Promise<Response>;
+
 	onAuthorized?: (ctx: {
 		session: RemixSession<SessionData>;
-	}) => Response | Promise<Response>;
+	}) => void | Promise<void>;
 };
 
 export type Config<
@@ -43,7 +44,7 @@ export type Config<
 export function setupRemixCircuit<
 	DataFnArgs extends { request: Request },
 	SessionData,
-	AuthRequirements,
+	AuthRequirements = any,
 	C extends Config<any, SessionData, AuthRequirements> = Config<
 		any,
 		SessionData,
