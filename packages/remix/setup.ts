@@ -32,7 +32,6 @@ export type Config<
 > = BaseConfig<Mw> & {
 	session?: {
 		storage: RemixStorage<SessionData>;
-		cookieName: string;
 	};
 	isLoggedIn?: (session: RemixSession<SessionData>) => boolean;
 	isAuthorized?: (
