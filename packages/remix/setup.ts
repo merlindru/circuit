@@ -183,15 +183,19 @@ export function setupRemixCircuit<
 
 						if (typeof key === "string") {
 							// key is a string, apply mapping
-							// opts.params = { pid: "projectId" }
-							//                       ↓↓↓↓↓↓↓↓↓
-							//                merge["projectId"] = params.pid
-							merge[key] = value;
+							//
+							//                    key ↴         value ↴
+							// opts = { params: { projectId:        "pid" }
+							//                       ↓                ↓
+							//              merge.projectId = params.pid
+							merge[key] = params[value];
 						} else {
-							// key is a number, e.g. opts.params = ["pid"]
-							//                                       ↓↓↓
-							//                                merge["pid"] = params.pid
-							merge[value] = value;
+							//
+							//       key and value ↴
+							// opts = { params: ["pid"] }
+							//                     ↓           ↘
+							//              merge.pid = params.pid
+							merge[value] = params[value];
 						}
 					}
 				}
