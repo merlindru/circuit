@@ -179,7 +179,7 @@ export function setupRemixCircuit<
 					merge = {};
 
 					for (const key in opts.params) {
-						const value = params[key];
+						const value = (opts.params as any)[key];
 
 						if (typeof key === "string") {
 							// key is a string, apply mapping
