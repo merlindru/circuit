@@ -49,7 +49,7 @@ export function setupRemixCircuit<
 		SessionData,
 		AuthRequirements
 	>
->(resolveConfig?: ResolveConfig<C>) {
+>(resolveConfig?: ResolveConfig<C>) /* @__PURE__ */ {
 	const config =
 		typeof resolveConfig === "function"
 			? resolveConfig({ pipe })

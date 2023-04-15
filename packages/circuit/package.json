@@ -8,6 +8,7 @@
 		"require": "./dist/cjs/index.js",
 		"types": "./dist/types/index.d.ts"
 	},
+	"sideEffects": false,
 	"types": "./dist/types/index.d.ts",
 	"scripts": {
 		"build": "npm run clean && tsc -b tsconfig.cjs.json tsconfig.esm.json tsconfig.types.json",

@@ -15,7 +15,7 @@ type ResolveConfig<C> = C | ((args: { pipe: typeof pipe }) => C);
 
 export function setupCircuit<FirstInput, C extends Config<any> = Config<any>>(
 	resolveConfig?: ResolveConfig<C>
-) {
+) /* @__PURE__ */ {
 	const config =
 		typeof resolveConfig === "function"
 			? resolveConfig({ pipe })

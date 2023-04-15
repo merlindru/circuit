@@ -9,6 +9,7 @@
 		"types": "./dist/types/index.d.ts"
 	},
 	"types": "./dist/types/index.d.ts",
+	"sideEffects": false,
 	"scripts": {
 		"build": "npm run clean && tsc -b tsconfig.cjs.json tsconfig.esm.json tsconfig.types.json",
 		"clean": "rimraf ./dist",
