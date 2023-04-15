@@ -199,7 +199,10 @@ export function setupRemixCircuit<
 		return compose<I, C, Omit<I, "data"> & { data: z.infer<T> }, C>(
 			(input) => {
 				try {
-					return schema.parse(input.data) as z.infer<T>;
+					return {
+						...input,
+						data: schema.parse(input.data) as z.infer<T>,
+					} as any;
 				} catch (e: any) {
 					if (onError) {
 						onError(e);
