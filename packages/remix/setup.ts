@@ -49,7 +49,7 @@ export function setupRemixCircuit<
 		SessionData,
 		AuthRequirements
 	>
->(resolveConfig?: ResolveConfig<C>) /* @__PURE__ */ {
+>(resolveConfig?: ResolveConfig<C>) {
 	const config =
 		typeof resolveConfig === "function"
 			? resolveConfig({ pipe })
@@ -323,5 +323,7 @@ export function setupRemixCircuit<
 		) as ReturnType<typeof withSession>;
 	}
 
-	return { compose };
+	const r = /* @__PURE__ */ { compose };
+
+	return r;
 }
