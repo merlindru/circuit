@@ -41,7 +41,7 @@ export type Config<
 };
 
 export function setupRemixCircuit<
-	DataFnArgs extends { request: Request },
+	DataFnArgs extends { request: Request; params: Record<string, string> },
 	SessionData,
 	AuthRequirements = any,
 	C extends Config<any, SessionData, AuthRequirements> = Config<
@@ -165,16 +165,41 @@ export function setupRemixCircuit<
 	 *     }
 	 * }
 	 */
-	function formData<C>() {
+	function formData<C>(opts?: { params: string[] | Record<string, string> }) {
 		return compose<
 			DataFnArgs,
 			C,
-			Promise<DataFnArgs & { data: Record<string, FormDataEntryValue> }>,
+			Promise<Record<string, FormDataEntryValue | string>>,
 			C
-		>(async (input, ctx) => {
+		>(async ({ request, params }) => {
+			let merge: Record<string, string> | undefined;
+
+			if (opts?.params != null) {
+				if (typeof opts.params === "object") {
+					merge = {};
+
+					for (const key in opts.params) {
+						const value = params[key];
+
+						if (typeof key === "string") {
+							// key is a string, apply mapping
+							// opts.params = { pid: "projectId" }
+							//                       ↑↑↑↑↑↑↑↑↑
+							//                 merge.projectId = params.pid
+							merge[key] = params[value];
+						} else {
+							// key is a number, e.g. opts.params = ["pid"]
+							//                                       ↑↑↑
+							//                                 merge.pid = params.pid
+							merge[value] = params[value];
+						}
+					}
+				}
+			}
+
 			return {
-				data: Object.fromEntries(await input.request.formData()),
-				...input,
+				...Object.fromEntries(await request.formData()),
+				...merge,
 			};
 		});
 	}
@@ -192,26 +217,21 @@ export function setupRemixCircuit<
 	 *     }
 	 * );
 	 */
-	function zod<T extends ZodSchema, I extends { data: any }, C>(
+	function zod<T extends ZodSchema, I, C>(
 		schema: T,
 		onError?: (err: ZodError) => void
 	) {
-		return compose<I, C, Omit<I, "data"> & { data: z.infer<T> }, C>(
-			(input) => {
-				try {
-					return {
-						...input,
-						data: schema.parse(input.data) as z.infer<T>,
-					} as any;
-				} catch (e: any) {
-					if (onError) {
-						onError(e);
-					}
-
-					throw e;
+		return compose<I, C, z.infer<T>, C>((input) => {
+			try {
+				return schema.parse(input) as z.infer<T>;
+			} catch (e: any) {
+				if (onError) {
+					onError(e);
 				}
+
+				throw e;
 			}
-		);
+		});
 	}
 
 	// ----- Auth -----
@@ -275,27 +295,27 @@ export function setupRemixCircuit<
 	 *     }
 	 * );
 	 */
-	function auth(authConfig?: AuthConfig) {
+	function auth(opts?: AuthConfig) {
 		return compose(
 			compose.pipe(withSession(), async (input, ctx) => {
 				// Check if logged in
 				if (!isLoggedIn(ctx.session)) {
-					if (authConfig?.onLoggedOut) {
-						return authConfig.onLoggedOut(ctx);
+					if (opts?.onLoggedOut) {
+						return opts.onLoggedOut(ctx);
 					}
 					throw new Error("Unauthorized");
 				}
 
 				// Check if authorized
-				if (authConfig && !isAuthorized(ctx.session, authConfig)) {
-					if (authConfig?.onForbidden) {
-						return authConfig.onForbidden(ctx);
+				if (opts && !isAuthorized(ctx.session, opts)) {
+					if (opts?.onForbidden) {
+						return opts.onForbidden(ctx);
 					}
 					throw new Error("Forbidden");
 				}
 
-				if (authConfig?.onAuthorized) {
-					authConfig.onAuthorized(ctx);
+				if (opts?.onAuthorized) {
+					opts.onAuthorized(ctx);
 				}
 
 				return input;
