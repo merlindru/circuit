@@ -166,12 +166,19 @@ export function setupRemixCircuit<
 	 * }
 	 */
 	function formData<C>() {
-		return compose<DataFnArgs, C, unknown, C>(async ({ request }, ctx) => {
-			return Object.fromEntries(await request.formData());
+		return compose<
+			DataFnArgs,
+			C,
+			Promise<DataFnArgs & { data: Record<string, FormDataEntryValue> }>,
+			C
+		>(async (input, ctx) => {
+			return {
+				data: Object.fromEntries(await input.request.formData()),
+				...input,
+			};
 		});
 	}
 
-	// ----- Validation -----
 	/**
 	 * Validates the input using Zod. If the input is invalid, an error will be thrown.
 	 *
@@ -185,21 +192,23 @@ export function setupRemixCircuit<
 	 *     }
 	 * );
 	 */
-	function zod<T extends ZodSchema, C>(
+	function zod<T extends ZodSchema, I extends { data: any }, C>(
 		schema: T,
 		onError?: (err: ZodError) => void
 	) {
-		return compose<any, C, z.infer<T>, C>((data) => {
-			try {
-				return schema.parse(data) as z.infer<T>;
-			} catch (e: any) {
-				if (onError) {
-					onError(e);
-				}
+		return compose<I, C, Omit<I, "data"> & { data: z.infer<T> }, C>(
+			(input) => {
+				try {
+					return schema.parse(input.data) as z.infer<T>;
+				} catch (e: any) {
+					if (onError) {
+						onError(e);
+					}
 
-				throw e;
+					throw e;
+				}
 			}
-		});
+		);
 	}
 
 	// ----- Auth -----
