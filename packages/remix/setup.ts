@@ -41,7 +41,10 @@ export type Config<
 };
 
 export function setupRemixCircuit<
-	DataFnArgs extends { request: Request; params: Record<string, string> },
+	DataFnArgs extends {
+		request: Request;
+		params: Record<string, any>;
+	},
 	SessionData,
 	AuthRequirements = any,
 	C extends Config<any, SessionData, AuthRequirements> = Config<
