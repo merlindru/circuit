@@ -58,7 +58,7 @@ export function setupRemixCircuit<
 			? resolveConfig({ pipe })
 			: resolveConfig;
 
-	const circuit = setupCircuit(config);
+	const circuit = setupCircuit<DataFnArgs, C>(config);
 
 	type IfConfigHas<
 		ConfigKey extends keyof C,
