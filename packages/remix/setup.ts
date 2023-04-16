@@ -69,6 +69,7 @@ export function setupRemixCircuit<
 		action: typeof dataFn;
 		loader: typeof dataFn;
 		formData: typeof formData;
+		json: typeof json;
 		zod: typeof zod;
 	} & IfConfigHas<
 			"session",
@@ -80,13 +81,21 @@ export function setupRemixCircuit<
 
 	compose.action = dataFn;
 	compose.loader = dataFn;
+
+	// Utils
 	compose.formData = formData;
+	compose.json = json;
+
+	// Validation
 	compose.zod = zod;
 
+	// Auth
 	if (config?.session !== undefined) {
 		compose.auth = auth;
 		compose.withSession = withSession;
 	}
+
+	// ------------------------------------------------------------------------
 
 	// Context arg type based on the ctx the middleware returns
 	// (Well, to nitpick, the middleware doesn't return the context object -- we pass
@@ -137,6 +146,12 @@ export function setupRemixCircuit<
 	}
 
 	// ----- Utils -----
+	function json<C>() {
+		return compose<DataFnArgs, C, Promise<any>, C>(async ({ request }) => {
+			return request.json();
+		});
+	}
+
 	/**
 	 * Parses form data and returns it as an object.
 	 *
