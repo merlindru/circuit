@@ -14,7 +14,7 @@ export type Fn<Prev, Next, PrevCtx, NextCtx = PrevCtx> = (
 	context: PrevCtx
 ) => Next extends FakeResult ? never : Next | FakeResult<Next, NextCtx>;
 
-export function pipe<A, B, C, CA = BaseCtx, CB = CA, CC = CB>(a: Fn<A, B, CA, CB>, b: Fn<Input<B>, C, CB, CC>): Pipe<A, unknown, C>; // prettier-ignore
+export function pipe<A, B, C, CA = BaseCtx, CB = CA, CC = CB>(a: Fn<Input<A>, B, CA, CB>, b: Fn<Input<B>, C, CB, CC>): Pipe<A, unknown, C>; // prettier-ignore
 export function pipe<A, B, C, D, CA = BaseCtx, CB = CA, CC = CB, CD = CC>(a: Fn<Input<A>, B, CA, CB>, b: Fn<Input<B>, C, CB, CC>, c: Fn<Input<C>, D, CC, CD>): Pipe<A, unknown, D>; // prettier-ignore
 export function pipe<A, B, C, D, E, CA = BaseCtx, CB = CA, CC = CB, CD = CC, CE = CD>(a: Fn<Input<A>, B, CA, CB>, b: Fn<Input<B>, C, CB, CC>, c: Fn<Input<C>, D, CC, CD>, d: Fn<Input<D>, E, CD, CE>): Pipe<A, unknown, E>; // prettier-ignore
 export function pipe<A, B, C, D, E, F, CA = BaseCtx, CB = CA, CC = CB, CD = CC, CE = CD, CF = CE>(a: Fn<Input<A>, B, CA, CB>, b: Fn<Input<B>, C, CB, CC>, c: Fn<Input<C>, D, CC, CD>, d: Fn<Input<D>, E, CD, CE>, e: Fn<Input<E>, F, CE, CF>): Pipe<A, unknown, F>; // prettier-ignore
