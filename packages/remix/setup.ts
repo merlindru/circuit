@@ -219,10 +219,12 @@ export function setupRemixCircuit<
 				}
 			}
 
-			return {
-				...Object.fromEntries(await request.formData()),
+			const data = Object.fromEntries(await request.formData());
+
+			return transformNestedKeys({
+				...data,
 				...merge,
-			};
+			});
 		});
 	}
 
@@ -348,4 +350,34 @@ export function setupRemixCircuit<
 	const r = /* @__PURE__ */ { compose };
 
 	return r;
+}
+
+type Obj = Record<string, any>;
+
+function transformNestedKeys(obj: Obj): Obj {
+	const result: Obj = {};
+
+	for (const key in obj) {
+		if (!key.includes(".")) {
+			result[key] = obj[key];
+			continue;
+		}
+
+		const parts = key.split(".");
+		let currentLevel = result;
+
+		for (let i = 0; i < parts.length; i++) {
+			const part = parts[i];
+
+			// Check if we're at the last part of the key ("baz" in "foo.bar.baz")
+			if (i === parts.length - 1) {
+				currentLevel[part] = obj[key]; // Set to the original value
+			} else {
+				currentLevel[part] = currentLevel[part] || {}; // Ensure the next part exists
+				currentLevel = currentLevel[part]; // Move to the next part
+			}
+		}
+	}
+
+	return result;
 }
