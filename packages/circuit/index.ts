@@ -1,4 +1,4 @@
 export { setupCircuit } from "./setup";
 export { pipe } from "./pipe";
 export type { BaseCtx, Config, Middleware } from "./setup";
-export type { Fn, Pipe } from "./pipe";
+export type { Fn, Pipe, InnerFn } from "./pipe";

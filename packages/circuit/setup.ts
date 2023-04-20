@@ -1,4 +1,4 @@
-import { Fn, pipe } from "./pipe";
+import { Fn, Pipe, pipe } from "./pipe";
 
 export interface BaseCtx {}
 
@@ -30,7 +30,7 @@ export function setupCircuit<FirstInput, C extends Config<any> = Config<any>>(
 		return fn;
 	}
 
-	compose.pipe = pipe;
+	compose.pipe = pipe as Pipe<FirstInput, BaseCtx>;
 
 	async function runMiddleware(input: FirstInput, ctx?: BaseCtx) {
 		return config?.middleware?.(input, ctx);

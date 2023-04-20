@@ -2,6 +2,7 @@ import { ZodError, ZodSchema, z } from "zod";
 import {
 	Config as BaseConfig,
 	Middleware,
+	Pipe,
 	pipe,
 	setupCircuit,
 } from "@circ/circuit";
@@ -66,6 +67,7 @@ export function setupRemixCircuit<
 	> = C[ConfigKey] extends undefined ? never : T;
 
 	const compose = circuit.compose as typeof circuit.compose & {
+		pipe: Pipe<DataFnArgs, Ctx>;
 		action: typeof dataFn;
 		loader: typeof dataFn;
 		formData: typeof formData;
