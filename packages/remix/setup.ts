@@ -67,6 +67,7 @@ export function setupRemixCircuit<
 		action: typeof dataFn;
 		loader: typeof dataFn;
 		intent: typeof intent;
+		params: typeof params;
 		json: typeof json;
 		formData: typeof formData;
 		zod: typeof zod;
@@ -118,6 +119,8 @@ export function setupRemixCircuit<
 	type TerminalValue = Promise<null | Response> | null | Response;
 	type TerminalFn<I, C> = (input: I, ctx: C) => TerminalValue;
 
+	type Params = Record<string, string>;
+
 	// A "data function" is either a loader or an action (Remix terminology)
 	// This function wraps a loader/action to do two things:
 	// 1. handle middleware
@@ -150,9 +153,14 @@ export function setupRemixCircuit<
 	}
 
 	// ----- Utils -----
-	function intent<Intent extends string, I extends { intent: Intent }, C>(
-		intent: string,
-		fn: TerminalFn<I, C>
+	/**
+	 * Required for type inference in {@link intent}
+	 */
+	type WithIntent<T, Intent> = T extends { intent: Intent } ? T : never;
+
+	function intent<Intent extends string, I extends { intent: string }, C>(
+		intent: Intent,
+		fn: TerminalFn<WithIntent<I, Intent>, C>
 	) {
 		return compose<I, C, I, C>((input, ctx) => {
 			if (input.intent === intent) {
@@ -161,21 +169,62 @@ export function setupRemixCircuit<
 				//
 				// In all other cases, we return the input as-is (see below),
 				// so the return type of `fn` is irrelevant.
-				return fn(input, ctx) as any;
+				return fn(input as any, ctx) as any;
 			}
 
 			return input;
 		});
 	}
 
-	function json<C>() {
-		return compose<DataFnArgs, C, Promise<any>, C>(async ({ request }) => {
-			return request.json();
-		});
+	/**
+	 * Parses the request body as JSON and returns it as an object.
+	 *
+	 * You can pass params to be merged into into the returned JSON object.
+	 *
+	 * **Note that if you do this,** and the request body is **not an object,** the output of this
+	 * function will be `{ data: <request body>, ...params }`. For example:
+	 *
+	 * It's recommended to use {@link zod compose.zod} to validate that this function returns what you expect.
+	 *
+	 * @example
+	 * compose.action(
+	 *     json({ params: { userId: "uid" } }),
+	 *     (input) => {
+	 *         // if body is { name: "John" }:
+	 *         const { name, userId } = input;
+	 *
+	 *         // if body is [123, 456, 789]:
+	 *         const { data, userId } = input;
+	 *
+	 *         data[0] === 123;
+	 *     }
+	 * )
+	 */
+	function json<C>(opts?: { params: Params }) {
+		return compose<DataFnArgs, C, Promise<any>, C>(
+			async ({ request, params }) => {
+				let merge: Params | undefined;
+
+				let data = await request.json();
+
+				if (typeof opts?.params === "object" && opts.params !== null) {
+					merge = mapParams(opts.params, params);
+
+					if (typeof data !== "object" || data === null) {
+						data = { data };
+					}
+				}
+
+				return transformNestedKeys({
+					...data,
+					...merge,
+				});
+			}
+		);
 	}
 
 	/**
-	 * Parses form data and returns it as an object.
+	 * Parses the request body as FormData and returns it as an object.
 	 *
 	 * @example
 	 * <Form method="post">
@@ -205,40 +254,17 @@ export function setupRemixCircuit<
 	 *     }
 	 * }
 	 */
-	function formData<C>(opts?: { params: string[] | Record<string, string> }) {
+	function formData<C>(opts?: { params: Params }) {
 		return compose<
 			DataFnArgs,
 			C,
 			Promise<Record<string, FormDataEntryValue | string>>,
 			C
 		>(async ({ request, params }) => {
-			let merge: Record<string, string> | undefined;
+			let merge: Params | undefined;
 
-			if (opts?.params != null) {
-				if (typeof opts.params === "object") {
-					merge = {};
-
-					for (const key in opts.params) {
-						const value = (opts.params as any)[key];
-
-						if (typeof key === "string") {
-							// key is a string, apply mapping
-							//
-							//                    key ↴         value ↴
-							// opts = { params: { projectId:        "pid" }
-							//                       ↓                ↓
-							//              merge.projectId = params.pid
-							merge[key] = params[value];
-						} else {
-							//
-							//       key and value ↴
-							// opts = { params: ["pid"] }
-							//                     ↓           ↘
-							//              merge.pid = params.pid
-							merge[value] = params[value];
-						}
-					}
-				}
+			if (typeof opts?.params === "object" && opts.params !== null) {
+				merge = mapParams(opts.params, params);
 			}
 
 			const data = Object.fromEntries(await request.formData());
@@ -248,6 +274,60 @@ export function setupRemixCircuit<
 				...merge,
 			});
 		});
+	}
+
+	function params<C>(mapping: Params) {
+		return compose<DataFnArgs, C, Params, C>(({ params }) =>
+			mapParams(mapping, params)
+		);
+	}
+
+	/**
+	 * Maps request parameters
+	 *
+	 * Mostly used in helper functions like {@link formData compose.formData} and {@link json compose.json}
+	 *
+	 * This also exists as a standalone helper: {@link params compose.params} (but it's not as useful)
+	 *
+	 * @example
+	 * mapParams({ projectId: "pid" }, { pid: "123" }); // => { projectId: "123" }
+	 *
+	 * @example
+	 * // Not particularly useful
+	 * mapParams(["pid"], { pid: "123" }); // => { pid: "123" }
+	 *
+	 * @example
+	 * // Let's make more sense of the previous example:
+	 * mapParams({ 0: "pid", 1: "uid", foo: "bar" }); // => { pid: "123", uid: "456", foo: "bar" }
+	 */
+	function mapParams(
+		mapping: Record<string, string>,
+		requestParams: Record<string, string>
+	) {
+		const result: Record<string, string> = {};
+
+		for (const mappingKey in mapping) {
+			const mappingValue = (mapping as any)[mappingKey];
+
+			if (typeof mappingKey === "string") {
+				// key is a string, apply mapping
+				//
+				//            mappingKey ↴   mappingValue ↴
+				// opts = { params: { projectId:        "pid" }
+				//                       ↓                ↓
+				//             result.projectId = params.pid
+				result[mappingKey] = requestParams[mappingValue];
+			} else if (typeof mappingKey === "number") {
+				//
+				//        mappingValue ↴
+				// opts = { params: ["pid"] }
+				//                     ↓           ↘
+				//             result.pid = params.pid
+				result[mappingValue] = requestParams[mappingValue];
+			}
+		}
+
+		return result;
 	}
 
 	/**
@@ -267,8 +347,27 @@ export function setupRemixCircuit<
 		schema: T,
 		onError?: (err: ZodError) => void
 	) {
-		return compose<I, C, z.infer<T>, C>((input) => {
+		return compose<I, C, Promise<z.infer<T>>, C>(async (input) => {
 			try {
+				// Check if input is `FormData`
+				if (input instanceof FormData) {
+					return schema.parse(
+						Object.fromEntries(input)
+					) as z.infer<T>;
+				}
+
+				// Check if input has `Request` (likely one of first functions in the pipe)
+				if (
+					typeof input === "object" &&
+					input !== null &&
+					"request" in input &&
+					input.request instanceof Request
+				) {
+					return schema.parse(
+						Object.fromEntries(await input.request.formData())
+					) as z.infer<T>;
+				}
+
 				return schema.parse(input) as z.infer<T>;
 			} catch (e: any) {
 				if (onError) {
@@ -376,6 +475,26 @@ export function setupRemixCircuit<
 
 type Obj = Record<string, any>;
 
+/**
+ * Nests all keys of {@param obj} that contain a dot.
+ *
+ * This currently doesn't support objects like this: `{ "foo": 123, "foo.bar": 456 }` (where foo could be either a number or an object).
+ * Using it this way is not stable and may change in the future.
+ *
+ * @example
+ * transformNestedKeys({
+ *     "foo.bar": 123,
+ *     "foo.baz": 456,
+ *     "que.sa.dil.la": true,
+ *     "asdf": 789,
+ * });
+ * // =>
+ * // {
+ * //     foo: { bar: 123, baz: 456 },
+ * //     que: { sa: { dil: { la: true } } },
+ * //     asdf: 789,
+ * // }
+ */
 function transformNestedKeys(obj: Obj): Obj {
 	const result: Obj = {};
 
