@@ -150,7 +150,7 @@ export function setupRemixCircuit<
 	}
 
 	// ----- Utils -----
-	function intent<I extends { intent: string }, C>(
+	function intent<Intent extends string, I extends { intent: Intent }, C>(
 		intent: string,
 		fn: TerminalFn<I, C>
 	) {
