@@ -66,8 +66,9 @@ export function setupRemixCircuit<
 		T
 	> = C[ConfigKey] extends undefined ? never : T;
 
+	const dataFn = _dataFn as Pipe<DataFnArgs, Ctx>;
+
 	const compose = circuit.compose as typeof circuit.compose & {
-		pipe: Pipe<DataFnArgs, Ctx>;
 		action: typeof dataFn;
 		loader: typeof dataFn;
 		formData: typeof formData;
@@ -114,14 +115,8 @@ export function setupRemixCircuit<
 	// This function wraps a loader/action to do two things:
 	// 1. handle middleware
 	// 2. inject the context argument (2nd arg)
-	function dataFn<
-		Callback extends Middleware<DataFnArgs, Ctx, any> = Middleware<
-			DataFnArgs,
-			Ctx,
-			any
-		>
-	>(callback: Callback) {
-		return (async (req: DataFnArgs, ctx: Ctx) => {
+	function _dataFn(...fns: ((...args: any[]) => any)[]) {
+		return async (req: DataFnArgs, ctx: Ctx) => {
 			try {
 				if (!ctx) {
 					ctx = {} as Ctx;
@@ -135,7 +130,7 @@ export function setupRemixCircuit<
 					}
 				}
 
-				return await callback(req, ctx); // `return await` needed for try/catch! do not remove
+				return await pipe(fns)(req, ctx); // `return await` needed for try/catch! do not remove
 			} catch (err: any) {
 				// if (config?.error !== undefined) {
 				// 	// eslint-disable-next-line no-ex-assign
@@ -144,7 +139,7 @@ export function setupRemixCircuit<
 
 				throw err;
 			}
-		}) as Middleware<DataFnArgs, Ctx, ReturnType<Callback>>;
+		};
 	}
 
 	// ----- Utils -----
