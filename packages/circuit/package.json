@@ -1,6 +1,6 @@
 {
 	"name": "@circ/circuit",
-	"version": "0.1.0-alpha.32",
+	"version": "0.1.0-alpha.34",
 	"description": "Circuitry for frameworks",
 	"private": false,
 	"exports": {
