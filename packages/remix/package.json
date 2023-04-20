@@ -1,6 +1,6 @@
 {
 	"name": "@circ/remix",
-	"version": "0.1.0-alpha.32",
+	"version": "0.1.0-alpha.33",
 	"description": "Circuitry for Remix",
 	"private": false,
 	"exports": {
