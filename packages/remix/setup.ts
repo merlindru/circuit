@@ -1,4 +1,3 @@
-import { ZodError, ZodSchema, z } from "zod";
 import {
 	Config as BaseConfig,
 	Middleware,
@@ -7,9 +6,10 @@ import {
 	setupCircuit,
 } from "@circ/circuit";
 import {
-	SessionStorage as RemixStorage,
 	Session as RemixSession,
+	SessionStorage as RemixStorage,
 } from "@remix-run/server-runtime";
+import { ZodError, ZodSchema, z } from "zod";
 
 type ResolveConfig<C> = C | ((args: { pipe: typeof pipe }) => C);
 
@@ -61,18 +61,14 @@ export function setupRemixCircuit<
 
 	const circuit = setupCircuit<DataFnArgs, C>(config);
 
-	type IfConfigHas<
-		ConfigKey extends keyof C,
-		T
-	> = C[ConfigKey] extends undefined ? never : T;
-
 	const dataFn = _dataFn as Pipe<DataFnArgs, Ctx>;
 
 	const compose = circuit.compose as typeof circuit.compose & {
 		action: typeof dataFn;
 		loader: typeof dataFn;
-		formData: typeof formData;
+		intent: typeof intent;
 		json: typeof json;
+		formData: typeof formData;
 		zod: typeof zod;
 	} & IfConfigHas<
 			"session",
@@ -86,8 +82,9 @@ export function setupRemixCircuit<
 	compose.loader = dataFn;
 
 	// Utils
-	compose.formData = formData;
+	compose.intent = intent;
 	compose.json = json;
+	compose.formData = formData;
 
 	// Validation
 	compose.zod = zod;
@@ -100,6 +97,11 @@ export function setupRemixCircuit<
 
 	// ------------------------------------------------------------------------
 
+	type IfConfigHas<
+		ConfigKey extends keyof C,
+		T
+	> = C[ConfigKey] extends undefined ? never : T;
+
 	// Context arg type based on the ctx the middleware returns
 	// (Well, to nitpick, the middleware doesn't return the context object -- we pass
 	// it into the middleware, and the middleware mutates it. The type of `Ctx` here
@@ -111,11 +113,16 @@ export function setupRemixCircuit<
 		? MiddlewareCtx
 		: {};
 
+	type AnyFunctionArray = ((...args: any[]) => any)[];
+
+	type TerminalValue = Promise<null | Response> | null | Response;
+	type TerminalFn<I, C> = (input: I, ctx: C) => TerminalValue;
+
 	// A "data function" is either a loader or an action (Remix terminology)
 	// This function wraps a loader/action to do two things:
 	// 1. handle middleware
 	// 2. inject the context argument (2nd arg)
-	function _dataFn(...fns: ((...args: any[]) => any)[]) {
+	function _dataFn(...fns: AnyFunctionArray) {
 		return async (req: DataFnArgs, ctx: Ctx) => {
 			try {
 				if (!ctx) {
@@ -143,6 +150,24 @@ export function setupRemixCircuit<
 	}
 
 	// ----- Utils -----
+	function intent<I extends { intent: string }, C>(
+		intent: string,
+		fn: TerminalFn<I, C>
+	) {
+		return compose<I, C, I, C>((input, ctx) => {
+			if (input.intent === intent) {
+				// We need to cast here. If this is the correct intent, then the
+				// return type of `fn` doesn't matter, because the pipe stops here.
+				//
+				// In all other cases, we return the input as-is (see below),
+				// so the return type of `fn` is irrelevant.
+				return fn(input, ctx) as any;
+			}
+
+			return input;
+		});
+	}
+
 	function json<C>() {
 		return compose<DataFnArgs, C, Promise<any>, C>(async ({ request }) => {
 			return request.json();
