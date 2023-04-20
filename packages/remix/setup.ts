@@ -130,7 +130,7 @@ export function setupRemixCircuit<
 					}
 				}
 
-				return await pipe(fns)(req, ctx); // `return await` needed for try/catch! do not remove
+				return await pipe(...fns)(req, ctx); // `return await` needed for try/catch! do not remove
 			} catch (err: any) {
 				// if (config?.error !== undefined) {
 				// 	// eslint-disable-next-line no-ex-assign
