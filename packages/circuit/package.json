@@ -3,6 +3,8 @@
 	"version": "0.1.0-alpha.34",
 	"description": "Circuitry for frameworks",
 	"private": false,
+	"main": "dist/cjs/index.js",
+	"module": "dist/esm/index.js",
 	"exports": {
 		"import": "./dist/esm/index.js",
 		"require": "./dist/cjs/index.js",
