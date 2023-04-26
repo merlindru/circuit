@@ -13,7 +13,7 @@
 	"sideEffects": false,
 	"types": "./dist/types/index.d.ts",
 	"scripts": {
-		"build": "npm run clean && tsc -b tsconfig.cjs.json tsconfig.esm.json tsconfig.types.json",
+		"build": "npm run clean && tsc -b tsconfig.cjs.json tsconfig.esm.json tsconfig.types.json && ./fixup-esm",
 		"clean": "rimraf ./dist",
 		"prepublish": "npm run build",
 		"preversion": "tsc --noEmit"
