@@ -1,4 +1,4 @@
-import { Fn, Pipe, pipe } from "./pipe";
+import { Fn, Pipe, pipe } from "./pipe.js";
 
 export interface BaseCtx {}
 
